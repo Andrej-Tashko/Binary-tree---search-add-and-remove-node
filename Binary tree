@@ -1,0 +1,151 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct Node
+{
+    int value;
+    Node *left;
+    Node *right;
+};
+
+Node* new_node(int value)
+{
+    Node* newNode = new Node();
+    newNode->value = value;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+Node* add_node(Node* root, int value)
+{
+    if (root == NULL)
+    {
+        root = new_node(value);
+    }
+    else if (value <= root->value)
+    {
+        root->left = add_node(root->left, value);
+    }
+    else if (value > root->value)
+    {
+        root->right = add_node(root->right, value);
+    }
+    return root;
+}
+
+int RightMin(Node* root)
+{
+    Node* temp = root;
+    //min value should be present in the left most node.
+    while(temp->left != NULL)
+    {
+        temp = temp->left;
+    }
+    return temp->value;
+}
+Node* remove_node(Node* root, int value)
+{
+    //This is to check if tree is empty and to check if the given node is not in the tree
+    if(root == NULL)
+        return NULL;
+    if(root->value < value)
+        root->right = remove_node(root->right,value);
+    else if(root->value > value)
+        root->left = remove_node(root->left,value);
+    //The actual removal
+    else
+    {
+        //If there's no left or right node just delete the node
+        if(root->left == NULL && root->right == NULL)
+        {
+            free(root);
+            return NULL;
+        }
+        //If there's no left node just replace the node with the right node
+        else if(root->left == NULL)
+        {
+            Node* temp = root->right;
+            free(root);
+            return temp;
+        }
+        //If there's no right node just replace the node with the left node
+        else if(root->right == NULL)
+        {
+            Node* temp = root->left;
+            free(root);
+            return temp;
+        }
+        //If there are both nodes find the right node's minimal value and replace it
+        else
+        {
+            int rightMin = RightMin(root->right);
+            root->value = rightMin;
+            root->right = remove_node(root->right,rightMin);
+        }
+    }
+    return root;
+}
+
+void inorder(Node* root)        //left child->root->right child
+{
+    if(root == NULL)
+        return;
+    inorder(root->left);
+    printf("%d ",root->value);
+    inorder(root->right);
+}
+void preorder(Node* root)       //root->left child->right child
+{
+    if(root == NULL)
+        return;
+    printf("%d ",root->value);
+    preorder(root->left);
+    preorder(root->right);
+}
+void postorder(Node* root)      //left child->right child->root
+{
+    if(root == NULL)
+        return;
+    postorder(root->left);
+    postorder(root->right);
+    printf("%d ",root->value);
+}
+
+int main()
+{
+   Node* root;
+   root = NULL;
+   root = add_node(root, 4);
+   root = add_node(root, 2);
+   root = add_node(root, 6);
+   root = add_node(root, 1);
+   root = add_node(root, 3);
+   root = add_node(root, 5);
+   root = add_node(root, 7);
+   /*
+         4
+       /   \
+      2     6
+     / \   / \
+    1   3 5   7
+   */
+   inorder(root);
+   cout<<endl;
+   preorder(root);
+   cout<<endl;
+   postorder(root);
+   cout<<endl;
+   cout<<"With removal and in postorder: ";
+   root = remove_node(root,4);
+   /*
+         5
+       /   \
+      2     6
+     / \     \
+    1   3     7
+   */
+   postorder(root);
+    return 0;
+}
